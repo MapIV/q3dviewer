@@ -226,7 +226,7 @@ class BuildExtWithCUDA(build_ext):
         # CUDA compilation flags
         cuda_flags = [
             '-O3',
-            '-std=c++14',
+            '-std=c++17',
             '--expt-relaxed-constexpr',
             '-DNDEBUG',
         ]
@@ -273,10 +273,6 @@ class BuildExtWithCUDA(build_ext):
         elif sys.platform == 'darwin':
             # macOS
             cmd.extend(['-undefined', 'dynamic_lookup'])
-        else:
-            # Linux
-            python_lib = f'python{sys.version_info.major}.{sys.version_info.minor}'
-            cmd.extend([f'-l{python_lib}'])
 
         print(f"Building CUDA extension: {ext.name}")
         print(f"Command: {' '.join(cmd)}")
