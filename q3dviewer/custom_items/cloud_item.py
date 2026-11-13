@@ -81,6 +81,9 @@ class CloudItem(BaseItem):
         self.T = np.eye(4, dtype=np.float32)
         # Enable depth test when full opaque
         self.path = os.path.dirname(__file__)
+        # Normalize '..' lexically: under Nuitka the 'custom_items' directory does not
+        # exist on disk, so a raw '<dir>/../shaders' path fails to resolve on Linux.
+        self.shader_dir = os.path.normpath(os.path.join(self.path, '..', 'shaders'))
 
     def add_setting(self, layout):
         label_ptype = QLabel("Point Type:")
@@ -400,9 +403,9 @@ class CloudItem(BaseItem):
 
     def initialize_gl(self):
         vertex_shader = open(
-            self.path + '/../shaders/cloud_vert.glsl', 'r', encoding='utf-8').read()
+            self.shader_dir + '/cloud_vert.glsl', 'r', encoding='utf-8').read()
         fragment_shader = open(
-            self.path + '/../shaders/cloud_frag.glsl', 'r', encoding='utf-8').read()
+            self.shader_dir + '/cloud_frag.glsl', 'r', encoding='utf-8').read()
         self.program = shaders.compileProgram(
             shaders.compileShader(vertex_shader, GL_VERTEX_SHADER),
             shaders.compileShader(fragment_shader, GL_FRAGMENT_SHADER),
@@ -424,7 +427,7 @@ class CloudItem(BaseItem):
 
         # ── Compute shader for GPU-only downsample ───────────────────────────────
         comp_src = open(
-            self.path + '/../shaders/downsample_comp.glsl', 'r', encoding='utf-8').read()
+            self.shader_dir + '/downsample_comp.glsl', 'r', encoding='utf-8').read()
         comp = shaders.compileShader(comp_src, GL_COMPUTE_SHADER)
         self.downsample_program = shaders.compileProgram(comp)
 

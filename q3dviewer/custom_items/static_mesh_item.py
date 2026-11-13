@@ -56,6 +56,9 @@ class StaticMeshItem(BaseItem):
         self.need_update_setting = True
         self.need_update_buffer = True
         self.path = os.path.dirname(__file__)
+        # Normalize '..' lexically: under Nuitka the 'custom_items' directory does not
+        # exist on disk, so a raw '<dir>/../shaders' path fails to resolve on Linux.
+        self.shader_dir = os.path.normpath(os.path.join(self.path, '..', 'shaders'))
     
     def add_setting(self, layout):
         """Add UI controls for mesh visualization"""
@@ -229,11 +232,11 @@ class StaticMeshItem(BaseItem):
 
     def initialize_gl(self):
         """OpenGL initialization - load triangle shader"""
-        frag_shader = open(self.path + '/../shaders/mesh_frag.glsl', 'r', encoding='utf-8').read()
+        frag_shader = open(self.shader_dir + '/mesh_frag.glsl', 'r', encoding='utf-8').read()
         
         try:
-            vert_shader = open(self.path + '/../shaders/triangle_mesh_vert.glsl', 'r', encoding='utf-8').read()
-            geom_shader = open(self.path + '/../shaders/triangle_mesh_geom.glsl', 'r', encoding='utf-8').read()
+            vert_shader = open(self.shader_dir + '/triangle_mesh_vert.glsl', 'r', encoding='utf-8').read()
+            geom_shader = open(self.shader_dir + '/triangle_mesh_geom.glsl', 'r', encoding='utf-8').read()
             self.program = shaders.compileProgram(
                 shaders.compileShader(vert_shader, GL_VERTEX_SHADER),
                 shaders.compileShader(geom_shader, GL_GEOMETRY_SHADER),

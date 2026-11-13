@@ -84,6 +84,9 @@ class MeshItem(BaseItem):
         self.need_update_setting = True
         self.need_update_buffer = True
         self.path = os.path.dirname(__file__)
+        # Normalize '..' lexically: under Nuitka the 'custom_items' directory does not
+        # exist on disk, so a raw '<dir>/../shaders' path fails to resolve on Linux.
+        self.shader_dir = os.path.normpath(os.path.join(self.path, '..', 'shaders'))
         self.save_path = str(Path(os.path.expanduser("~"), "mesh.stl"))
     
         
@@ -393,9 +396,9 @@ class MeshItem(BaseItem):
     def initialize_gl(self):
         """OpenGL initialization"""
         # Use instanced mesh shaders with geometry shader for GPU-side triangle generation
-        vert_shader = open(self.path + '/../shaders/mesh_vert.glsl', 'r', encoding='utf-8').read()
-        geom_shader = open(self.path + '/../shaders/mesh_geom.glsl', 'r', encoding='utf-8').read()
-        frag_shader = open(self.path + '/../shaders/mesh_frag.glsl', 'r', encoding='utf-8').read()
+        vert_shader = open(self.shader_dir + '/mesh_vert.glsl', 'r', encoding='utf-8').read()
+        geom_shader = open(self.shader_dir + '/mesh_geom.glsl', 'r', encoding='utf-8').read()
+        frag_shader = open(self.shader_dir + '/mesh_frag.glsl', 'r', encoding='utf-8').read()
         try:
             program = shaders.compileProgram(
                 shaders.compileShader(vert_shader, GL_VERTEX_SHADER),

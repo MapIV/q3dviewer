@@ -25,6 +25,9 @@ class GaussianItem(BaseItem):
         self.gs_data = np.empty([0])
         self.prev_Rz = np.array([np.inf, np.inf, np.inf])
         self.path = os.path.dirname(__file__)
+        # Normalize '..' lexically: under Nuitka the 'custom_items' directory does not
+        # exist on disk, so a raw '<dir>/../shaders' path fails to resolve on Linux.
+        self.shader_dir = os.path.normpath(os.path.join(self.path, '..', 'shaders'))
         try:
             import torch
             if not torch.cuda.is_available():
@@ -52,12 +55,12 @@ class GaussianItem(BaseItem):
 
     def initialize_gl(self):
         fragment_shader = open(
-            self.path + '/../shaders/gau_frag.glsl', 'r').read()
+            self.shader_dir + '/gau_frag.glsl', 'r').read()
         vertex_shader = open(
-            self.path + '/../shaders/gau_vert.glsl', 'r').read()
+            self.shader_dir + '/gau_vert.glsl', 'r').read()
         sort_shader = open(
-            self.path + '/../shaders/sort_by_key.glsl', 'r').read()
-        prep_shader = open(self.path + '/../shaders/gau_prep.glsl', 'r', encoding='utf-8').read()
+            self.shader_dir + '/sort_by_key.glsl', 'r').read()
+        prep_shader = open(self.shader_dir + '/gau_prep.glsl', 'r', encoding='utf-8').read()
 
         self.sort_program = shaders.compileProgram(
             shaders.compileShader(sort_shader, GL_COMPUTE_SHADER))
